@@ -2,7 +2,6 @@ import {Request, Response} from "express";
 import {createClient, getClients, updateClient, deleteClient} from "../models/ClientModel";
 import ClientSchema from "../schemas/ClientSchema";
 import z from "zod";
-import CnpjClientSchema from "../schemas/CnpjClientSchema";
 import { fetchCnpjData } from "../service/CnpjService";
 
 
@@ -61,8 +60,7 @@ export const editClient = async (req: Request, res: Response) => {
         const validatedData = ClientSchema.parse(req.body);
         await updateClient(validatedData.cnpj, validatedData);
 
-        const { cnpj, ...clientData } = validatedData;
-        res.status(200).json({cnpj, ...clientData});
+        res.status(200).json({validatedData});
     } catch (err) {
         if (err instanceof z.ZodError) {
           res.status(400).json({ errors: err.errors });
@@ -80,8 +78,6 @@ export const editClient = async (req: Request, res: Response) => {
 export const removeClient = async (req: Request, res: Response) => {
     try{
         const cnpj = req.params.cnpj;
-
-        CnpjClientSchema.parse({cnpj});
 
         await deleteClient(cnpj);
         res.status(200).send();
